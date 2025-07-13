@@ -52,12 +52,8 @@ tempfile config set expiry 14   # Sets default expiry to 14 days
 With metadata in `~/.tempfiles/metadata.json`
 
 ## Roadmap
--[] Modular architecture
--[] Configurable default expiry
--[] Tag support (soon)
--[] Archive / keep forever mode
--[] Sync or backup to cloud folder
--[] Shell autocompletion
+- [ ] Sync or backup to cloud folder
+- [ ] Shell autocompletion
 
 ## License
 
