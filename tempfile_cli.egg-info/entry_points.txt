@@ -1,0 +1,2 @@
+[console_scripts]
+tempfile = tempfile_cli.main:main
