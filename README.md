@@ -18,7 +18,7 @@
 
 ```bash
 brew install guischmid/tap/tempfile
-````
+```
 Then run:
 ```bash
 tempfile new
