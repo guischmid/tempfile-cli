@@ -8,7 +8,7 @@ init(autoreset=True)
 
 # List all tempfiles with their metadata
 def register(subparsers):
-    # Register the 'list' subcommand
+    """Register the ``list`` subcommand to show stored tempfiles."""
     parser = subparsers.add_parser("list", help="List all tempfiles")
     parser.add_argument(
         "--tag",
@@ -18,6 +18,7 @@ def register(subparsers):
 
 # Handle the 'list' command
 def handle(args):
+    """Display stored tempfiles with optional tag filtering."""
     metadata = load_metadata()
     if not metadata:
         print("No tempfiles found.")

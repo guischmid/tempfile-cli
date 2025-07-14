@@ -10,12 +10,13 @@ from tempfile_cli.core.utils  import (
 KEEP_DIR = Path.home() / "Documents" / "tempfile_kept"
 
 def register(subparsers):
-    # Register the 'keep' subcommand
+    """Register the ``keep`` subcommand for archiving a tempfile."""
     parser = subparsers.add_parser("keep", help="Move file to permanent location")
     parser.add_argument("name", help="Name of the file to keep")
     parser.set_defaults(handler=handle)
 
 def handle(args):
+    """Move the given tempfile to a permanent location."""
     ensure_dir(KEEP_DIR)
     metadata = load_metadata()
 

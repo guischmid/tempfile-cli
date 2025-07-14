@@ -4,6 +4,7 @@ import subprocess
 from pathlib import Path
 
 def register(subparsers):
+    """Register the ``schedule`` subcommand to install a cron job."""
     parser = subparsers.add_parser("schedule", help="Install a cron job for automatic cleaning")
     parser.set_defaults(handler=handle)
     parser.add_argument(
@@ -15,6 +16,7 @@ def register(subparsers):
     )
 
 def handle(args):
+    """Install a daily or weekly cron entry for automatic cleaning."""
     # Determine python executable and main.py path
     python_exec = sys.executable
     project_dir = Path(__file__).resolve().parent.parent
