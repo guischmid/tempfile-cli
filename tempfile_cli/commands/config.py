@@ -1,6 +1,7 @@
 from tempfile_cli.core.utils  import load_config, save_config
 
 def register(subparsers):
+    """Register the ``config`` subcommand for managing preferences."""
     parser = subparsers.add_parser("config", help="Get or set user preferences")
     parser.add_argument("action", choices=["get", "set"], help="Get or set a config value")
     parser.add_argument("key", help="The config key to access")
@@ -8,6 +9,7 @@ def register(subparsers):
     parser.set_defaults(handler=handle)
 
 def handle(args):
+    """Retrieve or update configuration values."""
     config = load_config()
 
     if args.action == "get":

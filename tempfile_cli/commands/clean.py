@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from tempfile_cli.core.utils  import load_metadata, save_metadata, TEMPFILE_DIR, load_config
 
 def register(subparsers):
-    # Register the 'clean' subcommand
+    """Register the ``clean`` subcommand to remove old tempfiles."""
     parser = subparsers.add_parser("clean", help="Delete old tempfiles")
     default_days = int(load_config().get("default_days", 30))  # fallback = 30
     parser.add_argument("days", nargs="?", type=int, default=default_days,
@@ -10,6 +10,7 @@ def register(subparsers):
     parser.set_defaults(handler=handle)
 
 def handle(args):
+    """Delete tempfiles older than the specified number of days."""
     now = datetime.now()
     metadata = load_metadata()
 

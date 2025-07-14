@@ -10,7 +10,7 @@ default_days = int(config.get("default_days", 30))  # fallback = 30
 
 
 def register(subparsers):
-    # Register the 'new' subcommand
+    """Register the ``new`` subcommand for creating a tempfile."""
     parser = subparsers.add_parser("new", help="Create a new tempfile")
     parser.add_argument("name", nargs="?", help="Optional name for the file")
     parser.add_argument("--tag", action="append", help="Add one or more tags")
@@ -18,6 +18,7 @@ def register(subparsers):
 
 
 def handle(args):
+    """Create a new tempfile, record metadata and open it."""
    
 
     # Ensure the directory exists
