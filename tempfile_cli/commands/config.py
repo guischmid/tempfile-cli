@@ -1,6 +1,7 @@
-from tempfile_cli.core.utils  import load_config, save_config
+import argparse
+from tempfile_cli.core.utils import load_config, save_config
 
-def register(subparsers):
+def register(subparsers: argparse._SubParsersAction) -> None:
     """Register the ``config`` subcommand for managing preferences."""
     parser = subparsers.add_parser("config", help="Get or set user preferences")
     parser.add_argument("action", choices=["get", "set"], help="Get or set a config value")
@@ -8,7 +9,7 @@ def register(subparsers):
     parser.add_argument("value", nargs="?", help="The value to set (only for 'set')")
     parser.set_defaults(handler=handle)
 
-def handle(args):
+def handle(args: argparse.Namespace) -> None:
     """Retrieve or update configuration values."""
     config = load_config()
 

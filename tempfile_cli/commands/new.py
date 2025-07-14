@@ -1,15 +1,22 @@
+import argparse
 import os
 import subprocess
 from pathlib import Path
 from datetime import datetime, timedelta
-from tempfile_cli.core.utils  import ensure_dir, load_metadata, save_metadata, TEMPFILE_DIR, METADATA_FILE, load_config
+from tempfile_cli.core.utils import (
+    ensure_dir,
+    load_metadata,
+    save_metadata,
+    TEMPFILE_DIR,
+    load_config,
+)
 
 # Load user configuration
 config = load_config()
-default_days = int(config.get("default_days", 30))  # fallback = 30
+default_days = int(config.get("default_days", 30))
 
 
-def register(subparsers):
+def register(subparsers: argparse._SubParsersAction) -> None:
     """Register the ``new`` subcommand for creating a tempfile."""
     parser = subparsers.add_parser("new", help="Create a new tempfile")
     parser.add_argument("name", nargs="?", help="Optional name for the file")
@@ -17,34 +24,40 @@ def register(subparsers):
     parser.set_defaults(handler=handle)
 
 
-def handle(args):
+def handle(args: argparse.Namespace) -> None:
     """Create a new tempfile, record metadata and open it."""
-   
+    try:
+        ensure_dir(TEMPFILE_DIR)
+    except OSError as e:
+        print(f"Error creating directory {TEMPFILE_DIR}: {e}")
+        return
 
-    # Ensure the directory exists
-    ensure_dir(TEMPFILE_DIR)
+    filename = args.name or datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    if not filename.endswith(".txt"):
+        filename += ".txt"
 
-    # Determine filename
-    filename = args.name or datetime.now().strftime("%Y-%m-%d_%H%M")
-    filename += ".txt"
     file_path = TEMPFILE_DIR / filename
 
-    # Create the file
-    file_path.touch(exist_ok=True)
-    now = datetime.now()
-    
+    if file_path.exists():
+        print(f"File already exists: {file_path}")
+        return
 
-    # Update metadata
-    metadata = load_metadata()
-    metadata[filename] = {
-        "created": now.isoformat(),
-        "expires": (now + timedelta(days=default_days)).isoformat(),
-        "tags": args.tag or []
-    }
-    save_metadata(metadata)
+    try:
+        file_path.touch(exist_ok=False)
+        now = datetime.now()
 
-    print(f"✅ Created: {file_path}")
+        metadata = load_metadata()
+        metadata[filename] = {
+            "created": now.isoformat(),
+            "expires": (now + timedelta(days=default_days)).isoformat(),
+            "tags": args.tag or [],
+        }
+        save_metadata(metadata)
 
-    # Open file in editor
-    editor = os.getenv("EDITOR", "nano")
-    subprocess.call([editor, str(file_path)])
+        print(f"✅ Created: {file_path}")
+
+        editor = os.getenv("EDITOR", "nano")
+        subprocess.call([editor, str(file_path)])
+
+    except OSError as e:
+        print(f"Error creating file {file_path}: {e}")

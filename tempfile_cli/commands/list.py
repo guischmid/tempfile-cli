@@ -1,3 +1,4 @@
+import argparse
 from datetime import datetime
 from tempfile_cli.core.utils import load_metadata, TEMPFILE_DIR
 from colorama import Fore, Style, init
@@ -6,62 +7,63 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 
 
-# List all tempfiles with their metadata
-def register(subparsers):
+def register(subparsers: argparse._SubParsersAction) -> None:
     """Register the ``list`` subcommand to show stored tempfiles."""
     parser = subparsers.add_parser("list", help="List all tempfiles")
-    parser.add_argument(
-        "--tag",
-        help="Only show notes containing this tag"
-    )
+    parser.add_argument("--tag", help="Only show notes containing this tag")
     parser.set_defaults(handler=handle)
 
-# Handle the 'list' command
-def handle(args):
+
+def handle(args: argparse.Namespace) -> None:
     """Display stored tempfiles with optional tag filtering."""
-    metadata = load_metadata()
+    try:
+        metadata = load_metadata()
+    except FileNotFoundError:
+        print("No tempfiles found.")
+        return
+
     if not metadata:
         print("No tempfiles found.")
         return
 
-    filtered = {}
     if args.tag:
-        # Only keep entries whose tags list contains args.tag
-        for fname, info in metadata.items():
-            tags = info.get("tags", [])
-            if args.tag in tags:
-                filtered[fname] = info
+        filtered_metadata = {
+            fname: info
+            for fname, info in metadata.items()
+            if args.tag in info.get("tags", [])
+        }
     else:
-        filtered = metadata
+        filtered_metadata = metadata
 
-    if not filtered:
+    if not filtered_metadata:
         print(f"No tempfiles found with tag '{args.tag}'.")
         return
 
-    entries = list(filtered.items())
+    # Sort by created date
+    entries = sorted(
+        filtered_metadata.items(),
+        key=lambda item: datetime.fromisoformat(item[1].get("created")),
+    )
 
-    # Sort by created date (default)
-    entries.sort(key=lambda item: item[1].get("created", ""))
-
-    print("🗒  Tempfiles:\n")
+    print("🗒️ Tempfiles:\n")
     for fname, info in entries:
-        # Calculate the size of a tempfile in KB
         file_path = TEMPFILE_DIR / fname
-        size_kb = (
-            file_path.stat().st_size / 1024
-            if file_path.exists()
-            else 0
-        )
+        try:
+            size_kb = file_path.stat().st_size / 1024 if file_path.exists() else 0
+            status = "✅ exists" if file_path.exists() else "❌ missing"
+        except FileNotFoundError:
+            size_kb = 0
+            status = "❌ missing"
+
         created = datetime.fromisoformat(info["created"]).strftime("%Y-%m-%d %H:%M")
         expires = datetime.fromisoformat(info["expires"]).strftime("%Y-%m-%d %H:%M")
-        tags = info.get("tags", [])
-        status = "✅ exists" if file_path.exists() else "❌ missing"
+        tags = ", ".join(info.get("tags", []))
 
-        print(Fore.GREEN + f"📄 {fname}")
-        print(Style.DIM + f"    created: {created}")
-        print(Fore.CYAN + f"    expires: {expires}")
+        print(f"{Fore.GREEN}📄 {fname}{Style.RESET_ALL}")
+        print(f"{Style.DIM}    created: {created}{Style.RESET_ALL}")
+        print(f"{Fore.CYAN}    expires: {expires}{Style.RESET_ALL}")
         if tags:
-            print(Fore.MAGENTA + f"    tags   : {', '.join(tags)}")
-        print(f"    status : {status}\n")
-        print(f"    size   : {size_kb:.1f} KB")
+            print(f"{Fore.MAGENTA}    tags   : {tags}{Style.RESET_ALL}")
+        print(f"    status : {status}")
+        print(f"    size   : {size_kb:.1f} KB\n")
 
