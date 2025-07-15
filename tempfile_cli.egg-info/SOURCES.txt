@@ -1,3 +1,4 @@
+LICENSE
 README.md
 pyproject.toml
 tempfile_cli/__init__.py
@@ -18,3 +19,5 @@ tempfile_cli/commands/new.py
 tempfile_cli/commands/schedule.py
 tempfile_cli/core/__init__.py
 tempfile_cli/core/utils.py
+tests/test_cli.py
+tests/test_utils.py
